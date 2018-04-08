@@ -44,8 +44,15 @@ def new_class(teacher_id):
                 state = "insert into  subject_teacher values(default,{0},'{1}',{2},'{3}')".format(teacher_id,e1,e2,e3)
                 cursor1.execute(state)
                 conn1.commit()
-                print("3")
                 
+                conn3 = mysql.connector.connect(host='localhost',database=DBname,user='root',password='root@123')
+                cursor3 =  conn3.cursor()
+                state = "CREATE TABLE IF NOT EXISTS ATTENDANCE(id int PRIMARY KEY AUTO_INCREMENT,teacher_id int,month char(20),Rollno int,Total_Attendance int,Attendance int,Subject char(20))"
+
+                cursor3.execute(state)
+                conn3.commit()
+
+                print("3")
                 label_add = Label(new_class_frame,text="Added",bg="#566DEF",fg="#0F0")
                 label_add.place(x=400,y=430)
 
@@ -54,14 +61,17 @@ def new_class(teacher_id):
                 conn.rollback()
                 conn1.rollback()
                 conn2.rollback()
+                conn3.rollback()
                 print("roll")
             finally:
                 cursor.close()
                 cursor1.close()
                 cursor2.close()
+                cursor3.close()
                 conn.close()
                 conn1.close()
                 conn2.close()
+                conn3.close()
         #===================================================
         
     def home():
@@ -99,7 +109,7 @@ def studentReport(teacher_id):
     logo.place(x=0,y=0,bordermode="outside")
     def home():
         studentReport_frame.destroy()
-        sec_frame()
+        sec_frame(teacher_id)
     
     def search():
         #-------------------database work----------------------
@@ -121,12 +131,165 @@ def newAttendance(teacher_id):
     logo=Label(newAttendance_frame,image=image)
     logo.place(x=0,y=0,bordermode="outside")
 
-    def new_add():
-        pass
+    data=[]
+    classes=[]
+    sub =[]
+    li =[]
+    rollno =[]
+    database = ''
+    get_mon = ''
+    get_subject =''
+    get_roll=''
+    month= ['JANUARY',
+            'FEBRUARY',
+            'MARCH',
+            'APRIL',
+            'MAY',
+            'JUNE',
+            'JULY',
+            'AUGUST',
+            'SEPTEMBER',
+            'OCTOBER',
+            'NOVEMBER',
+            'DECEMBER',]
+    
+    def func_month(value):
+        global get_mon
+        get_mon = value
+        print(get_mon)
+    def func_sub(value):
+        global get_subject
+        get_subject= value
+    def func_roll(value):
+        global get_roll
+        get_roll = value
+    
+    
+    monthvar = StringVar()
+    #variable.set(classes[0])
+    month_menu = OptionMenu(newAttendance_frame, monthvar, *month,command=func_month)
+    month_menu.config(width=10,font=('arial',12,'bold'))
+    month_menu.place(x=700,y=182)
+    
+    try:
+        conn = mysql.connector.connect(host='localhost',user='root',password='root@123')
+        cursor =  conn.cursor()
+        statement = "show databases"
+        cursor.execute(statement)
+        rows = cursor.fetchall()
+    except:
+        conn.rollback()
+    finally:
+        for row in rows:
+            filtered = fnmatch.filter(row, '20*')
+            if filtered !=[]:
+                data.append(filtered)
+            
+        for i,d in enumerate(data):
+            classes.append(d[0])
+        
+        cursor.close()
+        conn.close()
+
+    def func(value):
+        global database
+        database=value
+        sub = value.split('_')
+        global li
+        li=[]
+        try:
+            conn1 = mysql.connector.connect(host='localhost',database='login',user='root',password='root@123')
+            cursor1 =  conn1.cursor()
+            statement = "select subject from subject_teacher where teacher_id = {0} and class = '{1}' and year = {2}".format(teacher_id,sub[1].upper(),sub[0])
+            cursor1.execute(statement)
+            rows = cursor1.fetchall()
+            for row in rows:
+                print("hell")
+                li.append(row[0])
+            print(li)
+        except:
+            conn1.rollback()
+            print("rollback")
+            
+        finally:
+            if(li):
+                subject = StringVar()
+                #variable.set(classes[0])
+                subject_menu = OptionMenu(newAttendance_frame, subject, *li,command=func_sub)
+                subject_menu.config(width=10,font=('arial',12,'bold'))
+                subject_menu.place(x=155,y=315)
+            else:
+                label_roll = Label(newAttendance_frame,font=('arial',12,'bold'),bg="#566DEF",fg="#F00",text="You don't have any subject in this class")
+                label_roll.place(x=400,y=400)
+            
+            cursor1.close()
+            conn1.close()
+    
+        rollno =[]
+        try:
+            conn1 = mysql.connector.connect(host='localhost',database=value,user='root',password='root@123')
+            cursor1 =  conn1.cursor()
+            statement = "select Rollno from student"
+            cursor1.execute(statement)
+            rows = cursor1.fetchall()
+            for row in rows:
+                rollno.append(row[0])
+            print(rollno)
+        except:
+            conn1.rollback()
+        finally:
+            if(rollno):
+                roll = StringVar()
+                #variable.set(classes[0])
+                roll_menu = OptionMenu(newAttendance_frame, roll, *rollno,command=func_roll)
+                roll_menu.config(width=10,font=('arial',12,'bold'))
+                roll_menu.place(x=410,y=182)
+            else:
+                pass
+            
+            cursor1.close()
+            conn1.close()
+        
+        
 
     def home():
         newAttendance_frame.destroy()
-        sec_frame()
+        sec_frame(teacher_id)
+
+    def new_add():
+        global get_mon
+        global get_roll
+        global get_subject
+        global database
+        
+        print(get_mon)
+        print(get_roll)
+        print(get_subject)
+        print(database)
+        print(entry_total.get())
+        print(entry_atten.get())
+
+        try:
+            conn2 = mysql.connector.connect(host='localhost',database=database,user='root',password='root@123')
+            cursor2 = conn2.cursor()
+            statement = "insert into attendance values(default,{0},'{1}',{2},{3},{4},'{5}')".format(teacher_id,get_mon,get_roll,entry_total.get(),entry_atten.get(),get_subject)
+            cursor2.execute(statement)
+            conn2.commit()
+        except:
+            conn2.rollback()
+        finally:
+            label = Label(newAttendance_frame,font=('arial',20,'bold'),width=14,bg="#0F0",text="Attendance Added")
+            label.place(x=500,y=500)
+            cursor2.close()
+            conn2.close()
+            
+    
+    variable = StringVar()
+    #variable.set(classes[0])
+    class_menu = OptionMenu(newAttendance_frame, variable, *classes,command=func)
+    class_menu.config(width=10,font=('arial',12,'bold'))
+    class_menu.place(x=130,y=182)
+    
     entry_total = Entry(newAttendance_frame,font=('arial',20,'bold'),width=6,bg="#E3E8B4",insertwidth=2)
     entry_total.place(x=437,y=308)
 
@@ -171,17 +334,12 @@ def newStudent(teacher_id):
             filtered = fnmatch.filter(row, '20*')
             if filtered !=[]:
                 data.append(filtered)
-        print(data)
             
         for i,d in enumerate(data):
             classes.append(d[0])
-            print(classes)
         cursor.close()
         conn.close()
 
-    
-    def new_add():
-        pass
          
     def home():
         newStudent_frame.destroy()
@@ -192,30 +350,74 @@ def newStudent(teacher_id):
     
     entry_fname = Entry(newStudent_frame,font=('arial',20,'bold'),width=16,bg="#E3E8B4",insertwidth=2)
     entry_fname.place(x=730,y=293)
+    
     entry_grno = Entry(newStudent_frame,font=('arial',20,'bold'),width=16,bg="#E3E8B4",insertwidth=2)
     entry_grno.place(x=730,y=215)
 
     #entry_class = Entry(newStudent_frame,font=('arial',20,'bold'),width=16,bg="#E3E8B4",insertwidth=2)
     #entry_class.place(x=730,y=368)
+    
+    database =''
+    def func(value):
+        global database
+        database= value
+        print(database)
+        try:
+            conn = mysql.connector.connect(host='localhost',database=value,user='root',password='root@123')
+            cursor =  conn.cursor()
+            statement = "select Rollno from student order by Rollno desc limit 1"
+            cursor.execute(statement)
+            row = cursor.fetchone()
+            if(row):
+                row = row[0]+1
+            else:
+                row=1
+        except:
+            conn.rollback()
+        finally:
+            label_roll = Label(newStudent_frame,font=('arial',20,'bold'),width=14,bg="#E3E8B4",text=row)
+            label_roll.place(x=730,y=435)
+            cursor.close()
+            conn.close()
+        
+    
+    def new_add():
+        global database
+        print(database)
+        try:
+            conn1 = mysql.connector.connect(host='localhost',database=database,user='root',password='root@123')
+            cursor1 =  conn1.cursor()
+            statement = "insert into student value(default,{0},'{1}')".format(entry_grno.get(),entry_fname.get())
+            print(statement)
+            cursor1.execute(statement)
+            conn1.commit()
+            label_roll = Label(newStudent_frame,font=('arial',12,'bold'),width=7,bg="#566DEF",fg="#0F0",text='Added')
+            label_roll.place(x=730,y=560)
+        except:
+            conn1.rollback()
+        finally:
+            cursor1.close()
+            conn1.close()
 
-    entry_roll = Entry(newStudent_frame,font=('arial',20,'bold'),width=16,bg="#E3E8B4",insertwidth=2)
-    entry_roll.place(x=730,y=435)
-
+        
+    
     variable = StringVar()
     variable.set(classes[0])
-    class_menu = OptionMenu(newStudent_frame, variable, *classes)
+    class_menu = OptionMenu(newStudent_frame, variable, *classes,command=func)
     class_menu.config(width=19,font=('arial',12,'bold'))
     class_menu.place(x=730,y=368)
+
+    
     
     button_add = Button(newStudent_frame,text="ADD",width=9,height=2,fg="#000",bg="#E3E8B4",font=('arial',13,'bold'),activebackground='#566DEF',command=new_add)
     button_add.place(x=730,y=500)  
     
     button_home = Button(newStudent_frame, text="HOME",width=9,height=3,fg="#000",bg="#566DEF",font=('arial',13,'bold'),activebackground='#566DEF',command=home)
     button_home.place(x=910,y=64)
-    print(variable)
+    
 
     #-------------------roll no fetch------------------------------
-    
+
 
     
     newStudent_frame.mainloop()
