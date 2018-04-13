@@ -1,4 +1,5 @@
 >>>>   create database login;
+>>>>  use login;
 >>>>   create table Teacher_login(id int PRIMARY KEY, username char(20),password char(20));
 >>>>   create table subject_teacher(id int AUTO_INCREMENT PRIMARY KEY,teacher_id int,class char(20),year int,subject char(20));
 
@@ -6,3 +7,11 @@
 >>>>   insert into Teacher_login values(2,'PranaliPatil',1234);
 >>>>   insert into Teacher_login values(3,'AbhishekKaudare',1234);
 >>>>   
+
+login 
+   Teacher_login
+   subject_teacher
+
+class_database
+	student
+	Attendance
