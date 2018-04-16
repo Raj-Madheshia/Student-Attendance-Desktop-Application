@@ -3,10 +3,9 @@ from PIL import ImageTk,Image
 import mysql.connector
 import fnmatch
 import mysql
-R=Tk()
 
-#--------- CHANGES TO BE DONE OF LINE NUMBER 162------------
- 
+R = Tk()
+    
 def new_class(teacher_id):
     
     new_class_frame = Tk()
@@ -53,18 +52,13 @@ def new_class(teacher_id):
 
                 cursor3.execute(state)
                 conn3.commit()
-
-                print("3")
-                label_add = Label(new_class_frame,text="Added",bg="#566DEF",fg="#0F0")
-                label_add.place(x=400,y=430)
-
+                messagebox.showinfo("Information","New Class Added Sucessfully")
                 
             except: 
                 conn.rollback()
                 conn1.rollback()
                 conn2.rollback()
                 conn3.rollback()
-                print("roll")
             finally:
                 cursor.close()
                 cursor1.close()
@@ -97,7 +91,7 @@ def new_class(teacher_id):
     button_home.place(x=900,y=100)
     new_class_frame.mainloop()
 
-#===========================================Pranali(changes to be done here )============================================================    
+#===========================================root@123(changes to be done here )============================================================    
 def studentReport(teacher_id):
     studentReport_frame = Tk()
     studentReport_frame.resizable(width=FALSE, height=FALSE)
@@ -109,16 +103,18 @@ def studentReport(teacher_id):
     image=ImageTk.PhotoImage(Image_open)
     logo=Label(studentReport_frame,image=image)
     logo.place(x=0,y=0,bordermode="outside")
+    def home():
+        studentReport_frame.destroy()
+        sec_frame(teacher_id)
 
     data=[]
     classes=[]
-    li=[]
-    get_class= ''
-    get_month=''
-    get_subject=''
-    #table_frame = Frame(studentReport_frame,height=400,width=800,bg="#3463FF")
-    #table_frame.pack()
-    
+    sub =[]
+    li =[]
+    database = ''
+    get_mon = ''
+    get_subject =''
+    get_roll=''
     month= ['JANUARY',
             'FEBRUARY',
             'MARCH',
@@ -131,103 +127,23 @@ def studentReport(teacher_id):
             'OCTOBER',
             'NOVEMBER',
             'DECEMBER',]
-
-   
     
-    def home():
-        studentReport_frame.destroy()
-        sec_frame(teacher_id)
-    
-    def search():
-        global get_class
-        global get_month
-        global get_subject
-        
-            
-
-        
-        try:
-            conn = mysql.connector.connect(host='localhost',database=get_class,user='root',password='root@123')
-            cursor = conn.cursor()
-            statement="select Rollno,Total_Attendance,Attendance from attendance where month= '{0}' and Subject = '{1}'".format(get_month,get_subject)
-            cursor.execute(statement)
-            rows = cursor.fetchall()
-            for row in rows:
-                try:
-                    conn1 = mysql.connector.connect(host='localhost',database=get_class,user='root',password='root@123')
-                    cursor1 = conn1.cursor()
-                    statement1="select name from student where Rollno = {0}".format(row[0])
-                    cursor1.execute(statement1)
-                    name = cursor1.fetchone()
-                    print(name)
-                    print(row[0])
-                #=================================== TABLE GOES HERE =====================================
-                #-------------- row[0] = Rollno, name[0]=name, row[1]=Total Attendance, row[2]=Lecture Attend ---------------------------
-
-                #--------------- make function for calculating Percentage and status ----------------------------------
-
-
-                
-
-                #----------------------- END OF TABLE
-                except:
-                    conn1.rollback()
-                finally:
-                    cursor1.close()
-                    conn1.close()            
-        except:
-            conn.rollback()
-            print("rollnack")
-        finally:
-            cursor.close()
-            conn.close()
-        
-
+    def func_month(value):
+        global get_mon
+        get_mon = value
+        print(get_mon)
     def func_sub(value):
         global get_subject
-        get_subject = value
+        get_subject= value
+    def func_database(value):
+        global get_database
+        get_database=value
 
-
-    def func_month(value):
-        global get_month
-        get_month = value
-        
-    def func(value):
-        global  get_class
-        get_class=value
-        sub = value.split('_')
-        global li
-        li=[]
-        try:
-            conn1 = mysql.connector.connect(host='localhost',database='login',user='root',password='root@123')
-            cursor1 =  conn1.cursor()
-            statement = "select subject from subject_teacher where teacher_id = {0} and class = '{1}' and year = {2}".format(teacher_id,sub[1].upper(),sub[0])
-            cursor1.execute(statement)
-            rows = cursor1.fetchall()
-            for row in rows:
-                print("hell")
-                li.append(row[0])
-            print(li)
-        except:
-            conn1.rollback()
-            print("rollback")
-            
-        finally:
-            if(li):
-                subject = StringVar()
-                #variable.set(classes[0])
-                subject_menu = OptionMenu(studentReport_frame, subject, *li,command=func_sub)
-                subject_menu.config(width=8,font=('arial',12,'bold'))
-                subject_menu.place(x=568,y=32)
-            else:
-                label_roll = Label(newAttendance_frame,font=('arial',12,'bold'),bg="#566DEF",fg="#F00",text="You don't have any subject in this class")
-                label_roll.place(x=400,y=400)
-            
-            cursor1.close()
-            conn1.close()
-
-        
-
+    monthvar = StringVar()
+    #variable.set(classes[0])
+    month_menu = OptionMenu(studentReport_frame, monthvar, *month,command=func_month)
+    month_menu.config(width=7,font=('arial',12,'bold'))
+    month_menu.place(x=785,y=34)
     
     try:
         conn = mysql.connector.connect(host='localhost',user='root',password='root@123')
@@ -237,7 +153,6 @@ def studentReport(teacher_id):
         rows = cursor.fetchall()
     except:
         conn.rollback()
-        print("roll")
     finally:
         for row in rows:
             filtered = fnmatch.filter(row, '20*')
@@ -249,29 +164,103 @@ def studentReport(teacher_id):
         cursor.close()
         conn.close()
 
-    monthvar = StringVar()
-    #variable.set(classes[0])
-    month_menu = OptionMenu(studentReport_frame, monthvar, *month,command=func_month)
-    month_menu.config(width=7,font=('arial',9,'bold'))
-    month_menu.place(x=790,y=33)
+    def func(value):
+        global database
+        database=value
+        func_database(value)
+        sub = value.split('_')
+        global li
+        li=[]
+        frame_list.grid_forget()
+        try:
+            conn1 = mysql.connector.connect(host='localhost',database='login',user='root',password='root@123')
+            cursor1 =  conn1.cursor()
+            statement = "select subject from subject_teacher where teacher_id = {0} and class = '{1}' and year = {2}".format(teacher_id,sub[1].upper(),sub[0])
+            cursor1.execute(statement)
+            rows = cursor1.fetchall()
+            for row in rows:
+                li.append(row[0])
+        except:
+            conn1.rollback()
+            
+        finally:
+            if(li):
+                subject = StringVar()
+                #variable.set(classes[0])
+                subject_menu = OptionMenu(studentReport_frame, subject, *li,command=func_sub)
+                subject_menu.config(width=7,font=('arial',12,'bold'))
+                subject_menu.place(x=570,y=34)
+            else:
+                label_roll = Label(studentReport_frame,font=('arial',12,'bold'),bg="#566DEF",fg="#F00",text="You don't have any subject in this class")
+                label_roll.place(x=400,y=400)
+            
+            cursor1.close()
+            conn1.close()
+
     
     variable = StringVar()
     #variable.set(classes[0])
     
     class_menu = OptionMenu(studentReport_frame, variable, *classes,command=func)
     class_menu.config(width=7,font=('arial',12,'bold'))
-    class_menu.place(x=330,y=32)
-
-
+    class_menu.place(x=333,y=34)
     
-    button_search = Button(studentReport_frame, text="SEARCH",width=8,height=1,fg="#000",bg="#566DEF",font=('arial',13,'bold'),activebackground='#566DEF',command=search)
-    button_search.place(x=900,y=33)
-
+    
+    
+    
     button_home = Button(studentReport_frame, text="HOME",width=6,height=1,fg="#000",bg="#566DEF",font=('arial',13,'bold'),activebackground='#566DEF',command=home)
-    button_home.place(x=890,y=13)
+    button_home.place(x=890,y=550)
+    
+#===================================Report generation========================================================
+    rollnos=[]
+    tab=[]
+    r = []
+    def search():
+        global get_mon
+        global get_subject
+        try:
+            global r
+            conn1 = mysql.connector.connect(host='localhost',database=get_database,user='root',password='root@123')
+            cursor2 =  conn1.cursor()
+            
+            stmt1="select s.Rollno,s.name,a.Total_Attendance,a.Attendance from student as s,attendance as a where s.Rollno=a.Rollno and a.month= '{0}'  and a.Subject = '{1}' ".format(get_mon,get_subject)
+            cursor2.execute(stmt1)
+            r=cursor2.fetchall()
+            print(r)
+            length_rows = len(r)
+            length_cols = len(r[0])
+            display(length_rows,length_cols)  
+        except:
+            conn1.rollback()
+        finally:
+            
+            cursor2.close()
+            conn1.close()
+    def display(length_rows,length_cols):
+        global r
+        frame_list = Frame(studentReport_frame,width=1000,height=400,bg="#566DEF")
+        frame_list.place(x=100,y=150)
+        
+        for i in range(length_rows):
+            for j in range(length_cols):
+                e = Entry(frame_list,width=20,bg="#566DEF",font=('arial',13,'bold'),justify ='center',insertwidth=2,bd=5)
+                e.grid(row=i,column=j)
+                e.insert(END , r[i][j])
+    
+    #variable1 = StringVar()
+    label_title = Label(studentReport_frame,bg="#566DEF",text="                RollNo            Name       Total Lecture  Attendance           ",fg="#FFF",font=('arial',23,'bold'))
+    label_title.place(x=0,y=102)
+    button_search = Button(studentReport_frame, text="SEARCH",width=7,height=1,fg="#000",bg="#FFF",font=('arial',13,'bold'),activebackground='#566DEF',relief=RAISED,overrelief=RIDGE,command=search)
+    button_search.place(x=910,y=34)
+    l1=Label(studentReport_frame,bg="#566DEF",activebackground='#566DEF',font=('bold','20'))
+    l1.place(x=400,y=250)
+    #listbox1 = Listbox(studentReport_frame, width=50,borderwidth=0,fg="#FFF", highlightthickness=0,selectbackground='#fff',height=26,bg='#566DEF',font="10")
+    #listbox1.place(x=30,y=170)
+    frame_list = Frame(studentReport_frame,width=1000,height=400,bg="#566DEF")
+    frame_list.place(x=100,y=150)
     studentReport_frame.mainloop()
 
-#===========================================pranali============================================================   
+#===========================================root@123============================================================   
 
 def newAttendance(teacher_id):
     newAttendance_frame = Tk()
@@ -356,12 +345,9 @@ def newAttendance(teacher_id):
             cursor1.execute(statement)
             rows = cursor1.fetchall()
             for row in rows:
-                print("hell")
                 li.append(row[0])
-            print(li)
         except:
             conn1.rollback()
-            print("rollback")
             
         finally:
             if(li):
@@ -371,8 +357,7 @@ def newAttendance(teacher_id):
                 subject_menu.config(width=10,font=('arial',12,'bold'))
                 subject_menu.place(x=155,y=315)
             else:
-                label_roll = Label(newAttendance_frame,font=('arial',12,'bold'),bg="#566DEF",fg="#F00",text="You don't have any subject in this class")
-                label_roll.place(x=400,y=400)
+                messagebox.showinfo("Error","You don't have any subject in this class")
             
             cursor1.close()
             conn1.close()
@@ -386,7 +371,6 @@ def newAttendance(teacher_id):
             rows = cursor1.fetchall()
             for row in rows:
                 rollno.append(row[0])
-            print(rollno)
         except:
             conn1.rollback()
         finally:
@@ -413,13 +397,6 @@ def newAttendance(teacher_id):
         global get_roll
         global get_subject
         global database
-        
-        print(get_mon)
-        print(get_roll)
-        print(get_subject)
-        print(database)
-        print(entry_total.get())
-        print(entry_atten.get())
 
         try:
             conn2 = mysql.connector.connect(host='localhost',database=database,user='root',password='root@123')
@@ -430,8 +407,7 @@ def newAttendance(teacher_id):
         except:
             conn2.rollback()
         finally:
-            label = Label(newAttendance_frame,font=('arial',20,'bold'),width=14,bg="#0F0",text="Attendance Added")
-            label.place(x=500,y=500)
+            messagebox.showinfo("Information","Attendance Added Sucessfully")
             cursor2.close()
             conn2.close()
             
@@ -471,7 +447,7 @@ def newStudent(teacher_id):
     logo1.place(x=200,y=200,bordermode="outside")
 
 
-#================================= Pranali Year Class database ============================================    
+#================================= root@123 Year Class database ============================================    
     data=[]
     classes=[]
     try:
@@ -482,7 +458,6 @@ def newStudent(teacher_id):
         rows = cursor.fetchall()
     except:
         conn.rollback()
-        print("roll")
     finally:
         for row in rows:
             filtered = fnmatch.filter(row, '20*')
@@ -493,7 +468,7 @@ def newStudent(teacher_id):
             classes.append(d[0])
         cursor.close()
         conn.close()
-#================================= Pranali Year Class database ============================================ 
+#================================= root@123 Year Class database ============================================ 
          
     def home():
         newStudent_frame.destroy()
@@ -544,8 +519,7 @@ def newStudent(teacher_id):
             print(statement)
             cursor1.execute(statement)
             conn1.commit()
-            label_roll = Label(newStudent_frame,font=('arial',12,'bold'),width=7,bg="#566DEF",fg="#0F0",text='Added')
-            label_roll.place(x=730,y=560)
+            messagebox.showinfo("Information","Student Added")
         except:
             conn1.rollback()
         finally:
@@ -599,6 +573,8 @@ def sec_frame(teacher_id):
     button_new_class = Button(sec,text="CREATE NEW CLASS",width=34,height=16,bg="#E3E7B4",command=lambda:function(4))
     button_new_class.place(x=554,y=324)
 
+    
+    
     def function(value):
         if(value==4):
             sec.destroy()
@@ -612,6 +588,8 @@ def sec_frame(teacher_id):
         elif(value==1):
             sec.destroy()
             studentReport(teacher_id)
+
+    
     
     sec.mainloop()
 
@@ -633,7 +611,7 @@ def main_frame():
                             R.destroy()
                             sec_frame(row[0])
                     else:
-                        label1 = Label(R,text="INVALID USERNAME OR ID!!!!",fg="#F00",bg="#E3E8B4",font=('arial',10,'bold'))
+                        label1 = Label(R,text="INVALID USERNAME OR PASSWORD!!!!",fg="#F00",bg="#E3E8B4",font=('arial',10,'bold'))
                         label1.place(x=615,y=400)
             except:
                 conn.rollback()
@@ -654,7 +632,6 @@ def main_frame():
                   activebackground='#10D234',command=login_click)
     login.place(x=615,y=420)
 
-    
 
 R.resizable(width=FALSE, height=FALSE)
 R.geometry('1000x600')
@@ -663,12 +640,11 @@ Image_open=Image.open("bgimage.jpg")
 image=ImageTk.PhotoImage(Image_open)
 logo=Label(R,image=image)
 logo.place(x=0,y=0,bordermode="outside")
-
-#-------------------
+#----------------------
 
 #----------------------
 main_frame()
-
-
-
 R.mainloop()
+
+
+
