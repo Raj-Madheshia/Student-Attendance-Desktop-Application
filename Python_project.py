@@ -2,7 +2,7 @@ from tkinter import *
 from PIL import ImageTk,Image
 import mysql.connector
 import fnmatch
-import mysql
+import tkinter.messagebox
 
 R = Tk()
     
