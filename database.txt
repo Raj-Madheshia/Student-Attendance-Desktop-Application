@@ -6,12 +6,3 @@
 >>>>   insert into Teacher_login values(1,'RajMadheshia',1234);
 >>>>   insert into Teacher_login values(2,'PranaliPatil',1234);
 >>>>   insert into Teacher_login values(3,'AbhishekKaudare',1234);
->>>>   
-
-login 
-   Teacher_login
-   subject_teacher
-
-class_database
-	student
-	Attendance
